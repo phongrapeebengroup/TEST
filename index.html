@@ -3,351 +3,385 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>จองคิวจัดเก็บสินค้า - บ้านป๋อง</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Google Fonts (Kanit) -->
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <!-- SweetAlert2 for nice alerts -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <title>จองคิวจัดเก็บ - บ้านป๋องรีไซเคิล</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- LINE LIFF SDK -->
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     
     <style>
         body {
-            font-family: 'Kanit', sans-serif;
-            background-color: #f0f2f5;
-            color: #333;
-            padding-bottom: 40px;
+            font-family: 'Sarabun', sans-serif;
+            background-color: #f0fdf4; /* สีพื้นหลังเขียวอ่อนจางๆ */
+        }
+        
+        /* Custom Scrollbar for Modal */
+        .modal-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+        .modal-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 4px;
+        }
+        .modal-scroll::-webkit-scrollbar-thumb {
+            background: #888; 
+            border-radius: 4px;
+        }
+        .modal-scroll::-webkit-scrollbar-thumb:hover {
+            background: #555; 
         }
 
-        .header-bg {
-            background: linear-gradient(135deg, #198754 0%, #20c997 100%);
-            color: white;
-            padding: 30px 20px;
-            border-bottom-left-radius: 25px;
-            border-bottom-right-radius: 25px;
-            box-shadow: 0 4px 10px rgba(25, 135, 84, 0.2);
-            text-align: center;
-            margin-bottom: -30px; /* Pull content up */
+        .input-group {
             position: relative;
-            z-index: 0;
         }
-
-        .main-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-            margin: 0 15px;
-            position: relative;
-            z-index: 1;
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #15803d; /* green-700 */
         }
-
-        .section-header {
-            display: flex;
-            align-items: center;
-            font-weight: 600;
-            color: #198754;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #e9ecef;
-        }
-
-        .form-label {
-            font-weight: 500;
-            font-size: 0.95rem;
-            color: #555;
-        }
-
-        .form-control {
-            border-radius: 10px;
-            border: 1px solid #dee2e6;
-            padding: 10px;
-        }
-
-        .form-control:focus {
-            border-color: #198754;
-            box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
-        }
-
-        .material-item {
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid transparent;
-            transition: all 0.2s;
-        }
-
-        .material-item:focus-within {
-            border-color: #198754;
-            background-color: #fff;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-
-        .btn-submit {
-            background: #198754;
-            border: none;
-            border-radius: 50px;
-            padding: 12px 30px;
-            font-size: 1.1rem;
-            font-weight: 600;
+        .form-input {
             width: 100%;
-            box-shadow: 0 4px 15px rgba(25, 135, 84, 0.4);
-            transition: transform 0.2s;
+            padding: 0.75rem 1rem 0.75rem 2.5rem; /* left padding for icon */
+            border: 1px solid #e5e7eb;
+            border-radius: 1rem;
+            background-color: #f9fafb;
+            transition: all 0.3s ease;
         }
-
-        .btn-submit:hover {
-            background: #157347;
-            transform: translateY(-2px);
-        }
-
-        /* Loading Overlay */
-        #loadingOverlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(255,255,255,0.9);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            visibility: hidden;
-            opacity: 0;
-            transition: all 0.3s;
-        }
-        #loadingOverlay.show {
-            visibility: visible;
-            opacity: 1;
+        .form-input:focus {
+            outline: none;
+            border-color: #10b981;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
         }
     </style>
 </head>
-<body>
+<body class="text-gray-800 antialiased">
 
-    <!-- Loading Screen -->
-    <div id="loadingOverlay">
-        <div class="spinner-border text-success mb-3" role="status"></div>
-        <div class="text-muted">กำลังโหลดระบบ...</div>
-    </div>
-
-    <!-- Header Section -->
-    <div class="header-bg">
-        <h1>♻️ บ้านป๋อง</h1>
-        <p style="opacity: 0.9; margin:0;">ระบบจองคิวจัดเก็บสินค้า</p>
-    </div>
-
-    <form id="bookingForm" onsubmit="handleSubmit(event)">
+    <!-- Header Design -->
+    <header class="bg-gradient-to-r from-green-700 via-emerald-600 to-teal-500 text-white p-6 rounded-b-[2rem] shadow-xl relative overflow-hidden">
+        <!-- Decoration Circles -->
+        <div class="absolute top-0 right-0 -mr-4 -mt-4 w-24 h-24 rounded-full bg-white opacity-10"></div>
+        <div class="absolute bottom-0 left-0 -ml-4 -mb-4 w-16 h-16 rounded-full bg-white opacity-10"></div>
         
-        <!-- Main Content Card -->
-        <div class="container" style="max-width: 600px;">
-            <div class="main-card">
+        <div class="container mx-auto text-center relative z-10">
+            <div class="bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3 backdrop-blur-sm shadow-inner">
+                <i class="fa-solid fa-recycle text-3xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold tracking-wide">บ้านป๋องรีไซเคิล</h1>
+            <h2 class="text-sm font-medium opacity-90 tracking-wider">BAANPONG RECYCLE</h2>
+            <p class="text-xs mt-2 opacity-80 bg-black/10 inline-block px-3 py-1 rounded-full">ระบบจองคิวจัดเก็บสินค้า</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8 max-w-lg mb-20">
+        
+        <!-- Loading State -->
+        <div id="loading" class="flex flex-col items-center justify-center py-10 space-y-4">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-green-600"></div>
+            <p class="text-gray-500 text-sm">กำลังเชื่อมต่อ LINE...</p>
+        </div>
+
+        <!-- Form -->
+        <form id="bookingForm" class="hidden space-y-6 animate-fade-in-up">
+            
+            <!-- Section 1: Contact Info -->
+            <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+                <h2 class="text-lg font-bold text-green-800 mb-5 flex items-center border-b pb-2">
+                    <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-3 text-green-600">
+                        <i class="fa-solid fa-address-card"></i>
+                    </div>
+                    ข้อมูลผู้ติดต่อ
+                </h2>
                 
-                <!-- Section 1: Contact Info -->
-                <div class="section-header mt-2">
-                    <span>👤 ข้อมูลผู้ติดต่อ</span>
-                </div>
-
-                <div class="mb-3">
-                    <label for="name" class="form-label">ชื่อ-สกุล <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" id="name" placeholder="ระบุชื่อจริง นามสกุล" required>
-                </div>
-
-                <div class="mb-3">
-                    <label for="phone" class="form-label">เบอร์โทรติดต่อ <span class="text-danger">*</span></label>
-                    <input type="tel" class="form-control" id="phone" placeholder="08x-xxx-xxxx" required>
-                </div>
-
-                <div class="mb-3">
-                    <label for="address" class="form-label">ที่อยู่จัดเก็บสินค้า <span class="text-danger">*</span></label>
-                    <textarea class="form-control" id="address" rows="3" placeholder="บ้านเลขที่, ซอย, จุดสังเกต..." required></textarea>
-                </div>
-
-                <div class="mb-3">
-                    <label for="date" class="form-label">วันที่ต้องการให้เข้ารับ <span class="text-danger">*</span></label>
-                    <input type="date" class="form-control" id="date" required>
-                </div>
-
-                <!-- Section 2: Materials -->
-                <div class="section-header mt-4">
-                    <span>📦 ประเภทวัสดุรีไซเคิล</span>
-                </div>
-                <p class="small text-muted mb-3"><i class="bi bi-info-circle"></i> โปรดระบุปริมาณ (เช่น 2 ถุง, 10 กก.) ช่องไหนไม่มีให้เว้นว่างไว้</p>
-
-                <!-- Aluminum -->
-                <div class="material-item">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <label class="form-label mb-0">🥫 อลูมิเนียมกระป๋อง</label>
+                <div class="space-y-4">
+                    <div class="input-group">
+                        <i class="fa-solid fa-user input-icon"></i>
+                        <input type="text" id="name" required class="form-input" placeholder="ชื่อ-นามสกุล">
                     </div>
-                    <input type="text" class="form-control form-control-sm" id="alum" placeholder="ระบุปริมาณ...">
-                </div>
-
-                <!-- PET -->
-                <div class="material-item">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <label class="form-label mb-0">🥤 ขวด PET (พลาสติกใส)</label>
+                    
+                    <div class="input-group">
+                        <i class="fa-solid fa-phone input-icon"></i>
+                        <input type="tel" id="phone" required class="form-input" placeholder="เบอร์โทรศัพท์ (10 หลัก)">
                     </div>
-                    <input type="text" class="form-control form-control-sm" id="pet" placeholder="ระบุปริมาณ...">
-                </div>
 
-                <!-- Paper -->
-                <div class="material-item">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <label class="form-label mb-0">📦 กระดาษลัง</label>
+                    <div class="input-group">
+                        <i class="fa-solid fa-map-location-dot input-icon top-4 transform-none mt-3"></i>
+                        <textarea id="address" rows="3" required class="form-input" placeholder="ที่อยู่จัดเก็บ (บ้านเลขที่, ซอย, ถนน...)"></textarea>
                     </div>
-                    <input type="text" class="form-control form-control-sm" id="paper" placeholder="ระบุปริมาณ...">
-                </div>
 
-                <!-- Glass Mix -->
-                <div class="material-item">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <label class="form-label mb-0">🍾 ขวดแก้วรวม</label>
+                    <div class="input-group">
+                        <i class="fa-solid fa-calendar-days input-icon"></i>
+                        <input type="datetime-local" id="pickupDate" required class="form-input">
                     </div>
-                    <input type="text" class="form-control form-control-sm" id="glass_mix" placeholder="ระบุปริมาณ...">
                 </div>
+            </div>
 
-                <!-- Glass Crate -->
-                <div class="material-item">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <label class="form-label mb-0">🍺 ขวดแก้วพร้อมลัง</label>
+            <!-- Section 2: Materials -->
+            <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+                <h2 class="text-lg font-bold text-yellow-700 mb-2 flex items-center border-b pb-2 border-yellow-100">
+                    <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center mr-3 text-yellow-600">
+                        <i class="fa-solid fa-boxes-packing"></i>
                     </div>
-                    <input type="text" class="form-control form-control-sm" id="glass_crate" placeholder="ระบุจำนวนลัง...">
-                </div>
+                    ประเภทวัสดุรีไซเคิล
+                </h2>
+                <p class="text-xs text-gray-400 mb-5 pl-11">ระบุปริมาณโดยประมาณ (เช่น 10 กิโล, 2 ถุง)</p>
 
-                <!-- Other -->
-                <div class="material-item">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <label class="form-label mb-0">🔍 อื่นๆ (โปรดระบุ)</label>
+                <div class="space-y-3 pl-2">
+                    <!-- Item 1 -->
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 flex justify-center text-gray-400"><i class="fa-solid fa-can-food"></i></div>
+                        <div class="flex-1">
+                            <label class="text-xs text-gray-500 block mb-1">อลูมิเนียมกระป๋อง</label>
+                            <input type="text" id="mat_aluminum" class="form-input py-2 text-sm" placeholder="ระบุจำนวน...">
+                        </div>
                     </div>
-                    <input type="text" class="form-control form-control-sm" id="other" placeholder="เช่น เหล็ก, ทองแดง...">
-                </div>
+                    
+                    <!-- Item 2 -->
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 flex justify-center text-gray-400"><i class="fa-solid fa-bottle-water"></i></div>
+                        <div class="flex-1">
+                            <label class="text-xs text-gray-500 block mb-1">ขวด PET (ใส)</label>
+                            <input type="text" id="mat_pet" class="form-input py-2 text-sm" placeholder="ระบุจำนวน...">
+                        </div>
+                    </div>
 
-                <div class="mt-4 mb-2">
-                    <button type="submit" class="btn btn-primary btn-submit">
-                        ยืนยันการจองคิว
-                    </button>
-                </div>
+                    <!-- Item 3 -->
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 flex justify-center text-gray-400"><i class="fa-solid fa-box-open"></i></div>
+                        <div class="flex-1">
+                            <label class="text-xs text-gray-500 block mb-1">กระดาษลัง</label>
+                            <input type="text" id="mat_cardboard" class="form-input py-2 text-sm" placeholder="ระบุจำนวน...">
+                        </div>
+                    </div>
 
+                     <!-- Item 4 -->
+                     <div class="flex items-center space-x-3">
+                        <div class="w-8 flex justify-center text-gray-400"><i class="fa-solid fa-wine-bottle"></i></div>
+                        <div class="flex-1">
+                            <label class="text-xs text-gray-500 block mb-1">ขวดแก้วรวม</label>
+                            <input type="text" id="mat_glass_mix" class="form-input py-2 text-sm" placeholder="ระบุจำนวน...">
+                        </div>
+                    </div>
+
+                    <!-- Item 5 -->
+                     <div class="flex items-center space-x-3">
+                        <div class="w-8 flex justify-center text-gray-400"><i class="fa-solid fa-crate-apple"></i></div>
+                        <div class="flex-1">
+                            <label class="text-xs text-gray-500 block mb-1">ขวดแก้วพร้อมลัง</label>
+                            <input type="text" id="mat_glass_crate" class="form-input py-2 text-sm" placeholder="ระบุจำนวน...">
+                        </div>
+                    </div>
+
+                    <!-- Item 6 -->
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 flex justify-center text-gray-400"><i class="fa-solid fa-circle-plus"></i></div>
+                        <div class="flex-1">
+                            <label class="text-xs text-gray-500 block mb-1">อื่นๆ</label>
+                            <input type="text" id="mat_other" class="form-input py-2 text-sm" placeholder="ระบุชนิดและจำนวน...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pre-Submit Button -->
+            <button type="submit" class="w-full bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-green-200 transition-all duration-300 transform hover:scale-[1.02] flex justify-center items-center text-lg group">
+                <span>ตรวจสอบข้อมูล</span>
+                <i class="fa-solid fa-arrow-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+            </button>
+        </form>
+    </main>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="fixed inset-0 z-50 hidden">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onclick="closeModal()"></div>
+        
+        <!-- Modal Content -->
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden animate-bounce-in">
+            <div class="bg-green-50 p-4 border-b border-green-100 flex items-center justify-between">
+                <h3 class="text-green-800 font-bold text-lg"><i class="fa-solid fa-clipboard-check mr-2"></i>ยืนยันรายละเอียด</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
             </div>
             
-            <div class="text-center mt-3">
-                <small class="text-muted">Powered by BaanPong Recycle</small>
+            <div class="p-5 max-h-[60vh] overflow-y-auto modal-scroll bg-white">
+                <p class="text-xs text-gray-400 mb-2 text-center">ตัวอย่างข้อความที่จะส่งเข้าระบบ</p>
+                <!-- Preview Text Area -->
+                <div id="previewText" class="bg-gray-50 p-4 rounded-xl text-sm text-gray-700 font-mono border border-gray-200 whitespace-pre-wrap leading-relaxed"></div>
+            </div>
+
+            <div class="p-4 bg-white border-t border-gray-100 flex space-x-3">
+                <button onclick="closeModal()" class="flex-1 py-3 rounded-xl border border-gray-300 text-gray-600 font-medium hover:bg-gray-50 transition">
+                    แก้ไข
+                </button>
+                <button id="finalConfirmBtn" class="flex-1 py-3 rounded-xl bg-green-600 text-white font-bold shadow-md hover:bg-green-700 hover:shadow-lg transition flex justify-center items-center">
+                    <span id="btnText">ยืนยันการส่ง</span>
+                    <i class="fa-regular fa-paper-plane ml-2"></i>
+                </button>
             </div>
         </div>
-    </form>
-
-    <!-- Import LIFF SDK -->
-    <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+    </div>
 
     <script>
-        // ******************************************************
-        // ตั้งค่า LIFF ID ที่นี่ (เอามาจาก LINE Developers)
-        // ******************************************************
-        const LIFF_ID = "2008567177-lVqDkD19"; 
-        // ******************************************************
+        // --- LIFF CONFIGURATION ---
+        const YOUR_LIFF_ID = "2008567177-lVqDkD19"; 
 
-        // เริ่มต้นการทำงาน
-        document.addEventListener('DOMContentLoaded', async () => {
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            document.getElementById('date').valueAsDate = tomorrow;
+        // ตัวแปรสำหรับเก็บข้อความที่จะส่ง
+        let messageToSend = "";
 
-            // Initialize LIFF
-            try {
-                // เช็คว่าใส่ LIFF ID หรือยัง
-                if(LIFF_ID === "2008567177-lVqDkD19" || LIFF_ID === "") {
-                    console.warn("ยังไม่ได้ใส่ LIFF ID - ทำงานในโหมดจำลอง (Simulation Mode)");
-                    return;
+        // Animation Classes for Modal
+        const modal = document.getElementById('confirmModal');
+        const previewText = document.getElementById('previewText');
+        const finalConfirmBtn = document.getElementById('finalConfirmBtn');
+        const btnText = document.getElementById('btnText');
+
+        async function main() {
+            const loading = document.getElementById('loading');
+            const form = document.getElementById('bookingForm');
+
+            // Check LIFF ID (Modified: Hide error if ID is missing, just show form for testing)
+            if (YOUR_LIFF_ID === "2008567177-lVqDkD19") {
+                // ข้ามการเชื่อมต่อ LIFF แต่เปิดฟอร์มให้ใช้งานได้ (Test Mode)
+                loading.style.display = 'none';
+                form.classList.remove('hidden'); 
+            } else {
+                // กรณีใส่ ID แล้ว ให้เชื่อมต่อตามปกติ
+                try {
+                    await liff.init({ liffId: YOUR_LIFF_ID });
+                    if (liff.isLoggedIn() || liff.isInClient()) {
+                        loading.style.display = 'none';
+                        form.classList.remove('hidden');
+                    } else {
+                        liff.login();
+                    }
+                } catch (err) {
+                    loading.innerHTML = `<p class="text-red-500">Error: ${err.message}</p>`;
+                    form.classList.remove('hidden');
                 }
-
-                document.getElementById('loadingOverlay').classList.add('show');
-                await liff.init({ liffId: LIFF_ID });
-                
-                if (!liff.isLoggedIn()) {
-                    liff.login();
-                }
-            } catch (err) {
-                console.error("LIFF Init Error:", err);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'LIFF Error',
-                    text: 'ไม่สามารถเชื่อมต่อกับ LINE ได้ โปรดตรวจสอบ LIFF ID หรือการเชื่อมต่ออินเทอร์เน็ต',
-                    footer: `<small>${err.message}</small>`
-                });
-            } finally {
-                document.getElementById('loadingOverlay').classList.remove('show');
             }
-        });
 
-        async function handleSubmit(e) {
-            e.preventDefault();
+            // 1. Handle Form Submit -> Show Modal
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                generateMessage(); // สร้างข้อความ
+                openModal(); // เปิด Modal
+            });
 
-            // 1. ดึงข้อมูล
-            const name = document.getElementById('name').value;
-            const phone = document.getElementById('phone').value;
-            const address = document.getElementById('address').value;
-            const dateStr = document.getElementById('date').value;
+            // 2. Handle Final Confirm -> Send Message
+            finalConfirmBtn.addEventListener('click', async () => {
+                // UI Loading State
+                btnText.innerText = 'กำลังส่ง...';
+                finalConfirmBtn.disabled = true;
+                finalConfirmBtn.classList.add('opacity-75');
 
-            const materials = [
-                { id: 'alum', label: 'อลูมิเนียม' },
-                { id: 'pet', label: 'ขวด PET' },
-                { id: 'paper', label: 'กระดาษลัง' },
-                { id: 'glass_mix', label: 'ขวดแก้วรวม' },
-                { id: 'glass_crate', label: 'ขวดแก้วพร้อมลัง' },
-                { id: 'other', label: 'อื่นๆ' }
-            ];
+                if (liff.isInClient() && YOUR_LIFF_ID !== "YOUR_LIFF_ID_HERE") {
+                    try {
+                        await liff.sendMessages([{
+                            type: 'text',
+                            text: messageToSend
+                        }]);
+                        liff.closeWindow();
+                    } catch (error) {
+                        alert('เกิดข้อผิดพลาด: ' + error.message);
+                        resetBtn();
+                    }
+                } else {
+                    // Test Mode (Browser or No ID)
+                    setTimeout(() => {
+                        alert('จำลองการส่งข้อความสำเร็จ (Test Mode)\n\nข้อความ:\n' + messageToSend);
+                        closeModal();
+                        resetBtn();
+                    }, 1000); // Simulate network delay
+                }
+            });
+        }
 
-            const formatDate = (ds) => {
-                if(!ds) return "-";
-                const d = new Date(ds);
-                return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
+        // ฟังก์ชันสร้างข้อความ
+        function generateMessage() {
+            const data = {
+                name: document.getElementById('name').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                date: document.getElementById('pickupDate').value,
+                items: [
+                    { label: 'อลูมิเนียมกระป๋อง', val: document.getElementById('mat_aluminum').value },
+                    { label: 'ขวด PET', val: document.getElementById('mat_pet').value },
+                    { label: 'กระดาษลัง', val: document.getElementById('mat_cardboard').value },
+                    { label: 'ขวดแก้วรวม', val: document.getElementById('mat_glass_mix').value },
+                    { label: 'ขวดแก้วพร้อมลัง', val: document.getElementById('mat_glass_crate').value },
+                    { label: 'อื่นๆ', val: document.getElementById('mat_other').value },
+                ]
             };
 
-            // 2. สร้างข้อความ
-            let msg = `📝 *จองคิวจัดเก็บสินค้า (บ้านป๋อง)*\n`;
-            msg += `-----------------------------\n`;
-            msg += `👤 ชื่อ: ${name}\n`;
-            msg += `📞 โทร: ${phone}\n`;
-            msg += `📅 วันที่: ${formatDate(dateStr)}\n`;
-            msg += `📍 ที่อยู่: ${address}\n`;
-            msg += `-----------------------------\n`;
-            msg += `📦 *รายการวัสดุ:*\n`;
+            const dateObj = new Date(data.date);
+            const dateString = dateObj.toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
 
-            let hasMaterial = false;
-            materials.forEach(m => {
-                const val = document.getElementById(m.id).value.trim();
-                if(val) {
-                    msg += `- ${m.label}: ${val}\n`;
-                    hasMaterial = true;
+            let msg = `♻️ จองคิวบ้านป๋องรีไซเคิล\n`;
+            msg += `━━━━━━━━━━━━━━━━━━\n`;
+            msg += `👤 คุณ: ${data.name}\n`;
+            msg += `📞 โทร: ${data.phone}\n`;
+            msg += `🗓️ นัดรับ: ${dateString}\n`;
+            msg += `📍 สถานที่: ${data.address}\n`;
+            msg += `━━━━━━━━━━━━━━━━━━\n`;
+            msg += `📦 รายการวัสดุ:\n`;
+
+            let hasItems = false;
+            data.items.forEach(item => {
+                if (item.val && item.val.trim() !== "") {
+                    msg += `🔹 ${item.label}: ${item.val}\n`;
+                    hasItems = true;
                 }
             });
 
-            if(!hasMaterial) {
-                msg += `- ไม่ระบุปริมาณ\n`;
-            }
+            if (!hasItems) msg += "   (ไม่ได้ระบุจำนวน)\n";
+            msg += `━━━━━━━━━━━━━━━━━━\n`;
+            msg += `🙏 ขอบคุณที่ร่วมรักษ์โลกครับ`;
 
-            // 3. ตรวจสอบสภาพแวดล้อมและส่งข้อมูล
-            if (liff.isInClient()) {
-                // กรณีเปิดใน LINE จริง
-                try {
-                    await liff.sendMessages([{ type: 'text', text: msg }]);
-                    liff.closeWindow(); // ปิดหน้าต่างทันทีที่ส่งเสร็จ
-                } catch (err) {
-                    Swal.fire('Error', 'ไม่สามารถส่งข้อความได้: ' + err, 'error');
-                }
-            } else {
-                // กรณีเปิดใน Browser ทั่วไป หรือยังไม่ใส่ LIFF ID (Simulation Mode)
-                Swal.fire({
-                    title: 'จำลองการส่ง (Browser/Test Mode)',
-                    html: `<div style="text-align: left; background: #f1f1f1; padding: 15px; border-radius: 10px; font-family: monospace; font-size: 0.9rem; white-space: pre-wrap;">${msg}</div>`,
-                    icon: 'success',
-                    confirmButtonText: 'ปิดหน้าต่าง',
-                    confirmButtonColor: '#198754'
-                }).then(() => {
-                    if (typeof liff !== 'undefined' && liff.closeWindow) {
-                        liff.closeWindow();
-                    }
-                });
-            }
+            messageToSend = msg;
+            previewText.textContent = msg; // แสดงใน Modal
         }
+
+        // Modal Functions
+        function openModal() {
+            modal.classList.remove('hidden');
+            // Small animation trick
+            const content = modal.querySelector('div[class*="absolute top-1/2"]');
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }
+
+        window.closeModal = function() { // Make global
+            modal.classList.add('hidden');
+            resetBtn();
+        }
+
+        function resetBtn() {
+            btnText.innerText = 'ยืนยันการส่ง';
+            finalConfirmBtn.disabled = false;
+            finalConfirmBtn.classList.remove('opacity-75');
+        }
+
+        // Run
+        main();
     </script>
+
+    <style>
+        /* Animation Helpers */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+    </style>
 </body>
 </html>
